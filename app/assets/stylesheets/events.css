@@ -1,0 +1,55 @@
+body {
+  font-family: system-ui, sans-serif;
+  line-height: 1.5;
+  margin: 0;
+  color: #202530;
+  background: #fafafa;
+}
+
+main {
+  max-width: 48rem;
+  margin: 2rem auto;
+  padding: 0 1rem;
+}
+
+label {
+  display: block;
+  font-weight: 600;
+}
+
+input:not([type="submit"]), textarea {
+  box-sizing: border-box;
+  max-width: 100%;
+  width: 100%;
+  padding: 0.5rem;
+  font: inherit;
+}
+
+button, input[type="submit"] {
+  padding: 0.5rem 1rem;
+  font: inherit;
+  cursor: pointer;
+}
+
+.events {
+  padding-left: 1.5rem;
+}
+
+.events article {
+  border-bottom: 1px solid #ccc;
+  padding: 1rem 0;
+}
+
+.events h2 {
+  margin: 0.25rem 0;
+}
+
+.events .button_to {
+  display: inline-block;
+  margin-left: 1rem;
+}
+
+[role="alert"] {
+  border-left: 4px solid #ad1723;
+  padding-left: 1rem;
+}

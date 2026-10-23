@@ -1,0 +1,30 @@
+<%= form_with model: event do |form| %>
+  <% if event.errors.any? %>
+    <div role="alert">
+      <h2>Please correct the following errors:</h2>
+      <ul>
+        <% event.errors.full_messages.each do |message| %>
+          <li><%= message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <p>
+    <%= form.label :title %>
+    <%= form.text_field :title, required: true %>
+  </p>
+  <p>
+    <%= form.label :happened_on %>
+    <%= form.date_field :happened_on, required: true %>
+  </p>
+  <p>
+    <%= form.label :description %>
+    <%= form.text_area :description, rows: 8 %>
+  </p>
+  <p>
+    <%= form.label :url, "Source URL" %>
+    <%= form.url_field :url %>
+  </p>
+  <%= form.submit %>
+<% end %>

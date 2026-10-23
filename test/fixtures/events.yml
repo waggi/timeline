@@ -1,0 +1,12 @@
+earlier:
+  title: First event
+  happened_on: 2020-01-01
+  description: The beginning of the timeline.
+  url: https://example.com/first
+  source: manual
+
+later:
+  title: Later event
+  happened_on: 2024-06-15
+  description: An event collected from a blog.
+  source: blog
