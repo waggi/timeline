@@ -1,0 +1,21 @@
+<% content_for :title, "Events | Timeline" %>
+
+<h1>Events</h1>
+<p><%= link_to "New event", new_event_path %></p>
+
+<% if @events.empty? %>
+  <p>No events yet. Create your first event.</p>
+<% else %>
+  <ol class="events">
+    <% @events.each do |event| %>
+      <li>
+        <article id="<%= dom_id(event) %>">
+          <time datetime="<%= event.happened_on.iso8601 %>"><%= event.happened_on %></time>
+          <h2><%= link_to event.title, event %></h2>
+          <%= link_to "Edit", edit_event_path(event) %>
+          <%= button_to "Delete", event, method: :delete %>
+        </article>
+      </li>
+    <% end %>
+  </ol>
+<% end %>
