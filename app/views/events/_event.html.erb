@@ -1,0 +1,20 @@
+<div id="<%= dom_id event %>">
+  <h2>
+    <time datetime="<%= event.happened_on.iso8601 %>"><%= l event.happened_on, format: :long %></time>
+    — <%= event.title %>
+  </h2>
+
+  <% if event.description.present? %>
+    <%= simple_format event.description %>
+  <% end %>
+
+  <% if event.url.present? %>
+    <p><%= link_to "Source", event.url, rel: "noopener noreferrer", target: "_blank" %></p>
+  <% end %>
+
+  <p>
+    <small>Source: <%= event.source %></small> |
+    <%= link_to "Edit", edit_event_path(event) %> |
+    <%= button_to "Delete", event, method: :delete, form: { style: "display: inline", data: { turbo_confirm: "Delete this event?" } } %>
+  </p>
+</div>

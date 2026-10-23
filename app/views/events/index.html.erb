@@ -1,0 +1,15 @@
+<p style="color: green"><%= notice %></p>
+
+<% content_for :title, "Events" %>
+
+<h1>Events</h1>
+
+<p><%= link_to "New event", new_event_path %></p>
+
+<div id="events">
+  <% if @events.any? %>
+    <%= render @events %>
+  <% else %>
+    <p>No events yet.</p>
+  <% end %>
+</div>

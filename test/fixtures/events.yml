@@ -1,0 +1,13 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+launch:
+  title: Project launch
+  happened_on: 2026-03-15
+  description: The first public release.
+  url: https://example.com/launch
+  source: manual
+
+kickoff:
+  title: Kickoff meeting
+  happened_on: 2026-01-10
+  source: blog
