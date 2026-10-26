@@ -8,5 +8,5 @@
 <% end %>
 <p>Source type: <%= @event.source %></p>
 <p><%= link_to "Edit", edit_event_path(@event) %></p>
-<%= button_to "Delete", @event, method: :delete %>
+<%= button_to "Delete", @event, method: :delete, form: { data: { turbo_confirm: "Delete this event?" } } %>
 <p><%= link_to "Back to events", events_path %></p>

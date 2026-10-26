@@ -28,7 +28,7 @@ class EventsTest < ApplicationSystemTestCase
 
     click_on "Back to events"
     within "article", text: "Updated milestone" do
-      click_on "Delete"
+      accept_confirm { click_on "Delete" }
     end
 
     assert_text "Event was successfully deleted."

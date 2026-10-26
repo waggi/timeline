@@ -13,7 +13,7 @@
           <time datetime="<%= event.happened_on.iso8601 %>"><%= event.happened_on %></time>
           <h2><%= link_to event.title, event %></h2>
           <%= link_to "Edit", edit_event_path(event) %>
-          <%= button_to "Delete", event, method: :delete %>
+          <%= button_to "Delete", event, method: :delete, form: { data: { turbo_confirm: "Delete this event?" } } %>
         </article>
       </li>
     <% end %>
