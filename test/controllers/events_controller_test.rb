@@ -60,7 +60,7 @@ class EventsControllerTest < ActionDispatch::IntegrationTest
     assert_select "h1", @event.title
     assert_select "time[datetime=?]", @event.happened_on.iso8601
     assert_select "p", @event.description
-    assert_select "a[href=?]", @event.url, "Open source ↗"
+    assert_select "a[href=?][target=_blank][rel='noopener noreferrer']", @event.url, "Open source ↗"
   end
 
   test "shows an event without optional fields" do

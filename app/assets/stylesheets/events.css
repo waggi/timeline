@@ -280,12 +280,18 @@ body {
     align-items: start;
   }
 
-  .stats,
-  .event-list {
+  .stats {
     grid-column: 1 / -1;
   }
 
+  /* The list sits under the timeline, so the sticky card has its own column and never covers it. */
+  .event-list {
+    grid-column: 1;
+  }
+
   .event-details {
+    grid-column: 2;
+    grid-row: 2 / span 2;
     position: sticky;
     top: 5rem;
   }
