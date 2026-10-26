@@ -1,0 +1,12 @@
+<% content_for :title, "#{@event.title} | Timeline" %>
+
+<h1><%= @event.title %></h1>
+<p><time datetime="<%= @event.happened_on.iso8601 %>"><%= @event.happened_on %></time></p>
+<%= simple_format @event.description %>
+<% if @event.url.present? %>
+  <p><%= sanitize tag.a("Source", href: @event.url), tags: %w[a], attributes: %w[href] %></p>
+<% end %>
+<p>Source type: <%= @event.source %></p>
+<p><%= link_to "Edit", edit_event_path(@event) %></p>
+<%= button_to "Delete", @event, method: :delete, form: { data: { turbo_confirm: "Delete this event?" } } %>
+<p><%= link_to "Back to events", events_path %></p>

@@ -1,0 +1,53 @@
+.timeline {
+  font-family: system-ui, sans-serif;
+  line-height: 1.5;
+  max-width: 48rem;
+  margin: 2rem auto;
+  padding: 0 1rem;
+  color: #202530;
+  background: #fafafa;
+}
+
+.timeline label {
+  display: block;
+  font-weight: 600;
+}
+
+.timeline input:not([type="submit"]),
+.timeline textarea {
+  box-sizing: border-box;
+  max-width: 100%;
+  width: 100%;
+  padding: 0.5rem;
+  font: inherit;
+}
+
+.timeline button,
+.timeline input[type="submit"] {
+  padding: 0.5rem 1rem;
+  font: inherit;
+  cursor: pointer;
+}
+
+.timeline .events {
+  padding-left: 1.5rem;
+}
+
+.timeline .events article {
+  border-bottom: 1px solid #ccc;
+  padding: 1rem 0;
+}
+
+.timeline .events h2 {
+  margin: 0.25rem 0;
+}
+
+.timeline .events .button_to {
+  display: inline-block;
+  margin-left: 1rem;
+}
+
+.timeline [role="alert"] {
+  border-left: 4px solid #ad1723;
+  padding-left: 1rem;
+}
