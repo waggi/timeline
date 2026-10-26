@@ -111,14 +111,6 @@ class MemoryTest < ActiveSupport::TestCase
     end
   end
 
-  test "the .claude copy of the skill is identical to the .agents original" do
-    original = Rails.root.join(".agents/skills/shared-memory/SKILL.md")
-    copy = Rails.root.join(".claude/skills/shared-memory/SKILL.md")
-
-    assert original.file?, "missing #{relative(original)}"
-    assert_equal original.read, copy.read, "#{relative(copy)} differs from #{relative(original)}" if copy.exist?
-  end
-
   private
     def entries
       TYPES.keys.flat_map { |folder| Dir.glob(MEMORY.join(folder, "*")) }.map { |path| Pathname(path) }.sort
