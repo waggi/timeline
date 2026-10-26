@@ -24,7 +24,18 @@ export default class extends Controller {
       showCurrentTime: false,
       margin: { item: { horizontal: 8, vertical: 12 }, axis: 12 }
     })
-    this.timeline.on("select", ({ items }) => this.#showDetails(items[0]))
+    // vis-timeline detects taps by timing, which can miss clicks on a slow
+    // machine, so details open on the browser's own click instead.
+    this.timeline.on("rangechange", ({ byUser }) => { if (byUser) this.dragged = true })
+    this.canvasTarget.addEventListener("pointerdown", () => this.dragged = false)
+    this.canvasTarget.addEventListener("click", event => this.#clicked(event))
+
+    // The timeline re-lays out items a few times while it measures them;
+    // data-timeline-ready tells system tests when items stop moving.
+    this.timeline.on("changed", () => {
+      clearTimeout(this.readyTimer)
+      this.readyTimer = setTimeout(() => this.element.dataset.timelineReady = "true", 250)
+    })
 
     if (this.hasSelectedValue && this.urls.has(this.selectedValue)) {
       this.timeline.setSelection(this.selectedValue, { focus: true })
@@ -32,6 +43,7 @@ export default class extends Controller {
   }
 
   disconnect() {
+    clearTimeout(this.readyTimer)
     this.timeline?.destroy()
     this.timeline = null
   }
@@ -77,9 +89,12 @@ export default class extends Controller {
     this.groupTargets.forEach(group => group.hidden = !group.querySelector("[data-timeline-target=row]:not([hidden])"))
   }
 
-  #showDetails(id) {
-    if (id === undefined) return
+  #clicked(event) {
+    const item = event.target.closest("[data-event-id]")
+    if (!item || this.dragged) return
 
+    const id = Number(item.dataset.eventId)
+    this.timeline.setSelection(id)
     this.detailsTarget.src = this.urls.get(id)
   }
 

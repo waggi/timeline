@@ -4,7 +4,7 @@ class EventsTest < ApplicationSystemTestCase
   test "browsing the timeline and showing event details" do
     visit root_url
 
-    assert_selector "[data-testid=timeline] [data-testid=timeline-item]", count: Event.count
+    assert_selector "[data-timeline-ready] [data-testid=timeline] [data-testid=timeline-item]", count: Event.count
     assert_selector "[data-testid=timeline-item]", text: "MILESTONES"
     assert_no_selector "[data-testid=timeline] [data-testid=source-icon]"
 
