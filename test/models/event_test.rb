@@ -41,6 +41,14 @@ class EventTest < ActiveSupport::TestCase
     end
   end
 
+  test "database rejects unsupported sources when model validations are bypassed" do
+    skip "Bug: the database has no source inclusion constraint; insert_all! stores unsupported values"
+
+    assert_raises ActiveRecord::StatementInvalid do
+      Event.insert_all!([ { title: "Imported event", happened_on: Date.new(2026, 10, 23), source: "unknown" } ])
+    end
+  end
+
   test "accepts optional HTTP and HTTPS source URLs" do
     [ nil, "", "http://example.com", "https://example.com/post?q=timeline#event" ].each do |url|
       @event.url = url
@@ -88,5 +96,13 @@ class EventTest < ActiveSupport::TestCase
     Event.create!(title: "A later", happened_on: "2026-10-24", category: "Alpha")
 
     assert_equal [ "Milestones", "Zeta", "Alpha" ], Event.categories_by_first_use
+  end
+
+  test "categories_by_first_use uses the earliest event when a category is reused" do
+    first = Event.create!(title: "First new category", happened_on: "2026-10-23", category: "Travel")
+    Event.create!(title: "Another category", happened_on: "2026-10-24", category: "Work")
+    Event.create!(title: "Travel again", happened_on: "2026-10-25", category: first.category)
+
+    assert_equal [ "Milestones", "Travel", "Work" ], Event.categories_by_first_use
   end
 end

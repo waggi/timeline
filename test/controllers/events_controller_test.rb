@@ -71,6 +71,17 @@ class EventsControllerTest < ActionDispatch::IntegrationTest
     assert_select "a", text: "Open source ↗", count: 0
   end
 
+  test "shows the correct source label and icon for imported events" do
+    { "file" => "Imported from a file", "blog" => "Collected from the blog" }.each do |source, label|
+      @event.update!(source: source)
+      get event_url(@event)
+
+      assert_response :success
+      assert_select "[data-testid=source-icon][data-source=?][title=?]", source, label
+      assert_select ".event__source", text: /#{Regexp.escape(label)}/
+    end
+  end
+
   test "does not render unsafe source links even if validations were bypassed" do
     @event.update_column(:url, "javascript:alert(1)")
     get event_url(@event)
@@ -134,6 +145,19 @@ class EventsControllerTest < ActionDispatch::IntegrationTest
     assert_select "turbo-stream[action=replace][target=event_form]" do
       assert_select "template [role=alert]", /Title can't be blank/
       assert_select "template input[name=inline]"
+    end
+  end
+
+  test "invalid source URL in the timeline dialog keeps the entered values" do
+    assert_no_difference "Event.count" do
+      post events_url(format: :turbo_stream), params: { inline: 1, event: @attributes.merge(url: "javascript:alert(1)") }
+    end
+
+    assert_response :unprocessable_entity
+    assert_select "turbo-stream[action=replace][target=event_form]" do
+      assert_select "template [role=alert]", /Url must be an HTTP or HTTPS URL/
+      assert_select "template input[name='event[title]'][value=?]", @attributes[:title]
+      assert_select "template textarea[name='event[description]']", @attributes[:description]
     end
   end
 

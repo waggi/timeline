@@ -61,6 +61,7 @@ GitHub Actions (`.github/workflows/ci.yml`) runs the same checks plus system tes
 
 - Every piece of new code must have tests: models, controllers/requests, jobs, services (e.g. the crawler), and system tests for user-facing flows.
 - Bug fixes come with a test that reproduces the bug.
+- If a test fails, fix the application code, not the test. Change a test only when requirements change, and explain that change in the PR description.
 - Put tests in the matching directory under `test/`; use fixtures in `test/fixtures/`.
 - Tests must not hit the network — stub external HTTP calls (e.g. the blog crawler).
 

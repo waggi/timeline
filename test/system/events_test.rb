@@ -1,6 +1,65 @@
 require "application_system_test_case"
 
 class EventsTest < ApplicationSystemTestCase
+  test "the home page timeline shows a newly stored event" do
+    event = Event.create!(title: "New timeline entry", happened_on: Date.new(2023, 3, 14), description: "A new chapter")
+
+    visit root_url
+
+    assert_selector "[data-timeline-ready] [data-testid=timeline]"
+    assert_selector "[data-testid=timeline-item][data-event-id='#{event.id}']", text: event.title
+    assert_selector "[data-testid=event-list-item][data-event-id='#{event.id}']", text: event.title
+  end
+
+  test "clicking a timeline event shows its title, date and description" do
+    event = events(:earlier)
+    visit root_url
+
+    assert_selector "[data-timeline-ready] [data-testid=timeline-item][data-event-id='#{event.id}']"
+    find("[data-testid=timeline-item][data-event-id='#{event.id}']").click
+
+    within "[data-testid=event-details]" do
+      assert_selector "h1", text: event.title
+      assert_selector "time[datetime='#{event.happened_on.iso8601}']", text: "January 1, 2020"
+      assert_text event.description
+    end
+  end
+
+  test "adding an event through the home page form puts it on the timeline" do
+    visit root_url
+    find("[data-testid=add-event-button]").click
+
+    within "[data-testid=new-event-dialog]" do
+      fill_in "Title", with: "Added on the page"
+      fill_in "Happened on", with: Date.new(2026, 10, 23)
+      fill_in "Description", with: "Created through the dialog"
+      click_on "Create Event"
+    end
+
+    assert_selector "[data-testid=timeline-item]", text: "Added on the page"
+    event = Event.find_by!(title: "Added on the page")
+    assert_equal "manual", event.source
+    assert_current_path root_path
+    assert_selector "[data-timeline-ready] [data-testid=timeline-item][data-event-id='#{event.id}']", text: event.title
+    assert_selector "[data-testid=event-list-item][data-event-id='#{event.id}']", text: event.title
+  end
+
+  test "timeline distinguishes manual, file and blog events visually" do
+    skip "Bug: timeline items do not expose or visually distinguish event sources"
+
+    manual = events(:earlier)
+    blog = events(:later)
+    file = Event.create!(title: "Imported entry", happened_on: Date.new(2022, 5, 10), source: "file")
+    visit root_url
+
+    assert_selector "[data-timeline-ready] [data-testid=timeline-item]", count: 3
+    { manual => "manual", file => "file", blog => "blog" }.each do |event, source|
+      within "[data-testid=timeline-item][data-event-id='#{event.id}'][data-source='#{source}']" do
+        assert_selector "[data-testid=source-icon][data-source='#{source}']"
+      end
+    end
+  end
+
   test "browsing the timeline and showing event details" do
     visit root_url
 
