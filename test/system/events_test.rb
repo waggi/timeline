@@ -17,6 +17,7 @@ class EventsTest < ApplicationSystemTestCase
     within("[data-testid=event-list]") { click_on "First event" }
     within "[data-testid=event-details]" do
       assert_selector "h1", text: "First event"
+      assert_selector "a[target=_blank]", text: "Open source"
       assert_link "Open source", href: "https://example.com/first"
     end
 
@@ -62,6 +63,26 @@ class EventsTest < ApplicationSystemTestCase
 
     assert_text "Event was successfully deleted."
     assert_no_text "Updated milestone"
+  end
+
+  test "the event details card does not cover the event list when scrolling" do
+    30.times { |i| Event.create!(title: "Extra event #{i}", happened_on: Date.new(2022, 1, 1) + i, source: "manual") }
+    page.current_window.resize_to(1400, 700)
+    visit root_url
+    assert_selector "[data-timeline-ready]"
+
+    within("[data-testid=event-list]") { click_on "First event" }
+    within("[data-testid=event-details]") { assert_selector "h1", text: "First event" }
+
+    page.execute_script("window.scrollTo(0, document.body.scrollHeight)")
+    overlap = page.evaluate_script(<<~JS)
+      (() => {
+        const card = document.querySelector("[data-testid=event-details]").getBoundingClientRect()
+        const list = document.querySelector("[data-testid=event-list]").getBoundingClientRect()
+        return card.left < list.right && list.left < card.right && card.top < list.bottom && list.top < card.bottom
+      })()
+    JS
+    assert_not overlap, "the event details card overlaps the event list"
   end
 
   test "filtering the timeline by category" do

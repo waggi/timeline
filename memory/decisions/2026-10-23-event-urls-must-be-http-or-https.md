@@ -18,4 +18,7 @@ legitimate is lost.
 ## How to apply
 Keep this validation when the crawler or importer creates events; don't
 bypass it with `insert_all` or `update_column` for URLs. The show page also
-passes the link through `sanitize` (only `<a href>` allowed); keep both.
+passes the link through `sanitize` (only `<a>` with `href`, `target`, `rel`
+allowed); keep both. The link opens in a new tab (`target="_blank"`) with
+`rel="noopener noreferrer"`, so the opened page can't control the timeline tab
+(PR "event card no overlap", 2026-10-26).

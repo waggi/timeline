@@ -9,7 +9,7 @@
       <div class="event__description"><%= simple_format @event.description %></div>
     <% end %>
     <% if @event.url.present? %>
-      <p class="event__link"><%= sanitize tag.a("Open source ↗", href: @event.url), tags: %w[a], attributes: %w[href] %></p>
+      <p class="event__link"><%= sanitize tag.a("Open source ↗", href: @event.url, target: "_blank", rel: "noopener noreferrer"), tags: %w[a], attributes: %w[href target rel] %></p>
     <% end %>
     <p class="event__source"><%= source_icon(@event.source) %> <%= source_label(@event.source) %></p>
     <div class="event__actions">
