@@ -1,12 +1,21 @@
 <% content_for :title, "#{@event.title} | Timeline" %>
 
-<h1><%= @event.title %></h1>
-<p><time datetime="<%= @event.happened_on.iso8601 %>"><%= @event.happened_on %></time></p>
-<%= simple_format @event.description %>
-<% if @event.url.present? %>
-  <p><%= sanitize tag.a("Source", href: @event.url), tags: %w[a], attributes: %w[href] %></p>
+<%= turbo_frame_tag "event_details", target: "_top" do %>
+  <article class="card event <%= category_class(@event.category) %>" id="<%= dom_id(@event, :details) %>" data-event-id="<%= @event.id %>">
+    <%= category_chip(@event.category) %>
+    <h1><%= @event.title %></h1>
+    <p class="event__date"><time datetime="<%= @event.happened_on.iso8601 %>"><%= event_date(@event.happened_on) %></time></p>
+    <% if @event.description.present? %>
+      <div class="event__description"><%= simple_format @event.description %></div>
+    <% end %>
+    <% if @event.url.present? %>
+      <p class="event__link"><%= sanitize tag.a("Open source ↗", href: @event.url), tags: %w[a], attributes: %w[href] %></p>
+    <% end %>
+    <p class="event__source"><%= source_icon(@event.source) %> <%= source_label(@event.source) %></p>
+    <div class="event__actions">
+      <%= link_to "Edit", edit_event_path(@event), class: "button", data: { testid: "event-edit-link" } %>
+      <%= button_to "Delete", @event, method: :delete, class: "button button--danger", form: { data: { turbo_confirm: "Delete this event?", testid: "event-delete-form" } } %>
+    </div>
+    <p class="back-link"><%= link_to "← Back to events", events_path %></p>
+  </article>
 <% end %>
-<p>Source type: <%= @event.source %></p>
-<p><%= link_to "Edit", edit_event_path(@event) %></p>
-<%= button_to "Delete", @event, method: :delete, form: { data: { turbo_confirm: "Delete this event?" } } %>
-<p><%= link_to "Back to events", events_path %></p>

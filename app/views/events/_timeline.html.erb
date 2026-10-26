@@ -1,0 +1,60 @@
+<% events = events.to_a %>
+<section id="timeline_section" class="timeline-layout" data-controller="timeline"
+  data-timeline-items-value="<%= timeline_items(events).to_json %>"
+  data-timeline-selected-value="<%= selected&.id %>">
+  <% if events.empty? %>
+    <div class="card empty-state" data-testid="empty-state">
+      <svg viewBox="0 0 120 48" width="120" height="48" aria-hidden="true">
+        <path d="M8 34h104" stroke="#d7dbe6" stroke-width="2" stroke-linecap="round"/>
+        <circle cx="30" cy="34" r="5" fill="#c7c9ff"/><circle cx="60" cy="34" r="5" fill="#4f46e5"/><circle cx="90" cy="34" r="5" fill="#c7c9ff"/>
+        <rect x="42" y="6" width="36" height="16" rx="5" fill="#eef0ff"/><path d="M60 22v7" stroke="#4f46e5" stroke-width="2"/>
+      </svg>
+      <h2>No events yet</h2>
+      <p>Create your first event with “Add event”. It will show up here on the timeline.</p>
+      <button type="button" class="button button--primary" data-action="dialog#open">Add the first event</button>
+    </div>
+  <% else %>
+    <% years = events.map { |event| event.happened_on.year }.minmax %>
+    <% categories = events.group_by(&:category) %>
+    <dl class="stats" data-testid="stats">
+      <div class="stat"><dt>Events</dt><dd><%= events.size %></dd></div>
+      <div class="stat"><dt>Years</dt><dd><%= years.uniq.join("–") %></dd></div>
+      <div class="stat"><dt>Categories</dt><dd><%= categories.keys.compact.size %></dd></div>
+    </dl>
+
+    <div class="card timeline-card">
+      <div class="timeline-toolbar">
+        <div class="category-filter" role="group" aria-label="Filter by category" data-testid="category-filter">
+          <button type="button" class="filter-chip" aria-pressed="true" data-timeline-target="chip"
+            data-action="timeline#showAll" data-testid="category-filter-chip">All <span class="filter-chip__count"><%= events.size %></span></button>
+          <% categories.sort_by { |name, _| [ name.nil? ? 1 : 0, name.to_s.downcase ] }.each do |name, category_events| %>
+            <button type="button" class="filter-chip <%= category_class(name) %>" aria-pressed="false" data-timeline-target="chip"
+              data-category="<%= name %>" data-action="timeline#filter" data-timeline-category-param="<%= name %>" data-testid="category-filter-chip">
+              <span class="filter-chip__dot" aria-hidden="true"></span><%= name || "No category" %>
+              <span class="filter-chip__count"><%= category_events.size %></span>
+            </button>
+          <% end %>
+        </div>
+        <div class="timeline-zoom" role="group" aria-label="Zoom">
+          <button type="button" class="button button--icon" data-action="timeline#zoomOut" data-testid="zoom-out" aria-label="Zoom out" title="Zoom out">−</button>
+          <button type="button" class="button button--icon" data-action="timeline#zoomIn" data-testid="zoom-in" aria-label="Zoom in" title="Zoom in">+</button>
+          <button type="button" class="button" data-action="timeline#fit" data-testid="zoom-fit">Show all</button>
+        </div>
+      </div>
+      <div class="timeline-canvas" data-timeline-target="canvas" data-testid="timeline"></div>
+      <p class="timeline-hint">Drag to scroll · Ctrl + wheel or pinch to zoom · Click an event for details</p>
+    </div>
+
+    <%= turbo_frame_tag "event_details", src: (event_path(selected) if selected), target: "_top",
+      class: "event-details", data: { timeline_target: "details", testid: "event-details" } do %>
+      <div class="card event-details__placeholder">
+        <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M9 9l10.5 4.5-4.5 1.5-1.5 4.5L9 9Z"/><path d="M5 3v2 M3 5h2 M12 3l-1 2 M3 12l2-1"/>
+        </svg>
+        <p>Select an event on the timeline or in the list to see its details here.</p>
+      </div>
+    <% end %>
+
+    <%= render "event_list", events: events %>
+  <% end %>
+</section>

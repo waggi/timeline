@@ -2,15 +2,16 @@
 
 - Type: decision
 - Date: 2026-10-26
-- Source: conversation with the owner, branch claude/seed-jetbrains-milestones
+- Source: conversation with the owner, PR #11
 - Status: active
 
 ## What
 `db/seeds/jetbrains_academy_milestones.csv` is the owner's Notion export of
 17 JetBrains Academy milestones. `db/seeds.rb` loads it with
 `Event::CsvImport` as `source: "file"`; rerunning updates rows found by
-source, title and date. Events got an optional `category` column, filled from
-the CSV's Category column. Three internal URLs (Google Doc, jetbrains.team,
+source, title and date. The CSV Category column fills `category` (added in
+PR #10, see 2026-10-26-event-category-is-free-text-colored-by-first-use.md).
+Three internal URLs (Google Doc, jetbrains.team,
 internal YouTrack) were removed from the saved copy at the owner's request.
 
 ## Why

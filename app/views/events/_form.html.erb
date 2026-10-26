@@ -1,4 +1,8 @@
-<%= form_with model: event do |form| %>
+<%= form_with model: event, id: "event_form", class: "event-form", data: { testid: "event-form" } do |form| %>
+  <% if local_assigns[:inline] %>
+    <%= hidden_field_tag :inline, 1 %>
+  <% end %>
+
   <% if event.errors.any? %>
     <div role="alert">
       <h2>Please correct the following errors:</h2>
@@ -10,21 +14,37 @@
     </div>
   <% end %>
 
-  <p>
+  <div class="field">
     <%= form.label :title %>
-    <%= form.text_field :title, required: true %>
-  </p>
-  <p>
-    <%= form.label :happened_on %>
-    <%= form.date_field :happened_on, required: true %>
-  </p>
-  <p>
+    <%= form.text_field :title, required: true, placeholder: "What happened?" %>
+  </div>
+  <div class="field-row">
+    <div class="field">
+      <%= form.label :happened_on %>
+      <%= form.date_field :happened_on, required: true %>
+    </div>
+    <div class="field">
+      <%= form.label :category %>
+      <%= form.text_field :category, list: "category_suggestions", maxlength: 50, autocomplete: "off", placeholder: "e.g. Work, Travel" %>
+      <datalist id="category_suggestions">
+        <% Event.categories.each do |category| %>
+          <option value="<%= category %>"></option>
+        <% end %>
+      </datalist>
+    </div>
+  </div>
+  <div class="field">
     <%= form.label :description %>
-    <%= form.text_area :description, rows: 8 %>
-  </p>
-  <p>
+    <%= form.text_area :description, rows: local_assigns[:inline] ? 4 : 8, placeholder: "A few words about the event" %>
+  </div>
+  <div class="field">
     <%= form.label :url, "Source URL" %>
-    <%= form.url_field :url %>
-  </p>
-  <%= form.submit %>
+    <%= form.url_field :url, placeholder: "https://" %>
+  </div>
+  <div class="form-actions">
+    <% if local_assigns[:inline] %>
+      <button type="button" class="button" data-action="dialog#close">Cancel</button>
+    <% end %>
+    <%= form.submit class: "button button--primary" %>
+  </div>
 <% end %>
