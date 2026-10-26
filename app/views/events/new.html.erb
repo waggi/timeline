@@ -1,5 +1,7 @@
 <% content_for :title, "New event | Timeline" %>
 
-<h1>New event</h1>
-<%= render "form", event: @event %>
-<p><%= link_to "Back to events", events_path %></p>
+<section class="card page-card">
+  <p class="back-link"><%= link_to "← Back to events", events_path %></p>
+  <h1>New event</h1>
+  <%= render "form", event: @event %>
+</section>

@@ -1,21 +1,28 @@
 <% content_for :title, "Events | Timeline" %>
 
-<h1>Events</h1>
-<p><%= link_to "New event", new_event_path %></p>
+<div data-controller="dialog">
+  <header class="hero">
+    <div>
+      <p class="hero__eyebrow">Interactive timeline</p>
+      <h1>Events</h1>
+      <p class="hero__lead">Every moment in one place. Drag to travel through time, zoom in on a period, click an event to read it.</p>
+    </div>
+    <button type="button" class="button button--primary button--large" data-action="dialog#open" data-testid="add-event-button">
+      <span aria-hidden="true">+</span> Add event
+    </button>
+  </header>
 
-<% if @events.empty? %>
-  <p>No events yet. Create your first event.</p>
-<% else %>
-  <ol class="events">
-    <% @events.each do |event| %>
-      <li>
-        <article id="<%= dom_id(event) %>">
-          <time datetime="<%= event.happened_on.iso8601 %>"><%= event.happened_on %></time>
-          <h2><%= link_to event.title, event %></h2>
-          <%= link_to "Edit", edit_event_path(event) %>
-          <%= button_to "Delete", event, method: :delete, form: { data: { turbo_confirm: "Delete this event?" } } %>
-        </article>
-      </li>
-    <% end %>
-  </ol>
-<% end %>
+  <%= render "timeline", events: @events, selected: nil %>
+
+  <dialog class="dialog" aria-labelledby="new-event-heading" data-dialog-target="dialog" data-testid="new-event-dialog"
+    data-action="click->dialog#closeOnBackdrop turbo:submit-end->dialog#closeOnSuccess">
+    <div class="dialog__header">
+      <div>
+        <h2 id="new-event-heading">New event</h2>
+        <p class="dialog__lead">It appears on the timeline right after saving.</p>
+      </div>
+      <button type="button" class="button button--icon" data-action="dialog#close" aria-label="Close">&times;</button>
+    </div>
+    <%= render "form", event: Event.new, inline: true %>
+  </dialog>
+</div>

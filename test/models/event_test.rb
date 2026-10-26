@@ -61,4 +61,32 @@ class EventTest < ActiveSupport::TestCase
 
     assert_equal [ events(:earlier), same_day, events(:later) ], Event.chronological.to_a
   end
+
+  test "category is optional, trimmed and limited to 50 characters" do
+    @event.category = "  Work   trips  "
+    assert @event.save
+    assert_equal "Work trips", @event.category
+
+    @event.category = "   "
+    assert @event.valid?
+    assert_nil @event.category
+
+    @event.category = "a" * 51
+    assert_not @event.valid?
+    assert_includes @event.errors[:category], "is too long (maximum is 50 characters)"
+  end
+
+  test "categories lists distinct names in alphabetical order" do
+    Event.create!(title: "Another", happened_on: "2026-10-23", category: "Bravo")
+    Event.create!(title: "Again", happened_on: "2026-10-24", category: "Bravo")
+
+    assert_equal [ "Bravo", "Milestones" ], Event.categories
+  end
+
+  test "categories_by_first_use keeps the order in which categories appeared" do
+    Event.create!(title: "Z first", happened_on: "2026-10-23", category: "Zeta")
+    Event.create!(title: "A later", happened_on: "2026-10-24", category: "Alpha")
+
+    assert_equal [ "Milestones", "Zeta", "Alpha" ], Event.categories_by_first_use
+  end
 end
