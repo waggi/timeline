@@ -9,7 +9,15 @@ Rails application for an interactive timeline of events. Events will come from t
 - manual entry by users;
 - a crawler that collects events from a blog.
 
-Neither is implemented yet — the app is currently a fresh Rails skeleton.
+Manual entry exists (the `Event` model and pages); the crawler is not implemented yet.
+
+## Shared memory
+
+`memory/` holds what earlier agents and the owner learned: decisions and their reasons, traps, and how the sandboxes, CI and tokens behave. Use the skill `.agents/skills/shared-memory/SKILL.md` for both steps below.
+
+- **ALWAYS read `memory/` before a task.** List the entries with `grep -h -m1 '^# ' memory/*/*.md`, read every entry related to the task, and always read `memory/context/`.
+- **ALWAYS update shared memory with the skill at the end of a task**, in the same pull request: record new decisions, lessons and environment facts. If there is nothing new, say so in the PR description ("memory: nothing new").
+- If memory contradicts the code or the spec, the code and spec win: tell the owner and fix the entry.
 
 ## Stack
 
@@ -55,3 +63,11 @@ GitHub Actions (`.github/workflows/ci.yml`) runs the same checks plus system tes
 - Bug fixes come with a test that reproduces the bug.
 - Put tests in the matching directory under `test/`; use fixtures in `test/fixtures/`.
 - Tests must not hit the network — stub external HTTP calls (e.g. the blog crawler).
+
+## Definition of Done
+
+- The work is on its own branch from an up-to-date `main`, in one PR opened with `gh pr create`.
+- New code has tests; bug fixes have a test that reproduces the bug.
+- `bin/ci` is green locally, and CI is green for the pushed branch.
+- The PR description fills in every section of `.github/pull_request_template.md`.
+- memory/ updated with the shared-memory skill (or 'memory: nothing new' in the PR).
