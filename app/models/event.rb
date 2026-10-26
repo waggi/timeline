@@ -1,6 +1,8 @@
 class Event < ApplicationRecord
+  SOURCES = %w[manual file blog].freeze
+
   validates :title, :happened_on, presence: true
-  validates :source, inclusion: { in: %w[manual file blog] }
+  validates :source, inclusion: { in: SOURCES }
   validate :url_must_be_http
 
   scope :chronological, -> { order(:happened_on, :id) }

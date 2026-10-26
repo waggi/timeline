@@ -1,0 +1,15 @@
+<section class="card event-list" aria-labelledby="event-list-heading" data-testid="event-list">
+  <h2 id="event-list-heading">All events</h2>
+  <% events.group_by { |event| event.happened_on.year }.each do |year, year_events| %>
+    <h3 class="event-list__year"><%= year %></h3>
+    <ol class="events">
+      <% year_events.each do |event| %>
+        <li id="<%= dom_id(event) %>" class="event-list__item" data-testid="event-list-item" data-event-id="<%= event.id %>">
+          <time datetime="<%= event.happened_on.iso8601 %>"><%= event.happened_on.strftime("%b %-d") %></time>
+          <%= source_icon(event.source) %>
+          <%= link_to event.title, event, data: { turbo_frame: "event_details", action: "timeline#select", timeline_id_param: event.id } %>
+        </li>
+      <% end %>
+    </ol>
+  <% end %>
+</section>

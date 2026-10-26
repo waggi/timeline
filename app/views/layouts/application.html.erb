@@ -19,15 +19,21 @@
     <link rel="apple-touch-icon" href="/icon.png">
 
     <%# Includes all stylesheet files in app/assets/stylesheets %>
+    <%= stylesheet_link_tag "vis-timeline-graph2d.min", "data-turbo-track": "reload" %>
     <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
     <%= javascript_importmap_tags %>
   </head>
 
   <body>
+    <header class="site-header">
+      <%= link_to "Timeline", root_path, class: "site-header__brand" %>
+    </header>
     <main class="timeline">
-      <% if notice.present? %>
-        <p role="status"><%= notice %></p>
-      <% end %>
+      <div id="flash" class="flash">
+        <% if notice.present? %>
+          <p role="status"><%= notice %></p>
+        <% end %>
+      </div>
       <%= yield %>
     </main>
   </body>

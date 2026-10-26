@@ -6,17 +6,26 @@ class EventsControllerTest < ActionDispatch::IntegrationTest
     @attributes = { title: "New event", happened_on: "2026-10-23", description: "Some details", url: "https://example.com/new" }
   end
 
-  test "home page lists events chronologically with actions" do
+  test "home page shows the timeline, the event list and the inline form" do
     get root_url
 
     assert_response :success
     assert_select "h1", "Events"
-    assert_select "ol.events article h2" do |headings|
-      assert_equal Event.chronological.map(&:title), headings.map { |heading| heading.text.strip }
+    assert_select "[data-controller=timeline][data-timeline-items-value]" do |sections|
+      items = JSON.parse(sections.first["data-timeline-items-value"])
+      assert_equal Event.chronological.map(&:id), items.map { |item| item["id"] }
+      assert_equal({ "id" => @event.id, "title" => @event.title, "date" => "2020-01-01", "source" => "manual", "url" => event_path(@event) }, items.first)
     end
-    assert_select "a[href=?]", new_event_path
-    assert_select "a[href=?]", edit_event_path(@event)
-    assert_select "form[action=?] input[name=_method][value=delete]", event_path(@event)
+    assert_select "[data-testid=timeline]"
+    assert_select "turbo-frame#event_details[target=_top]"
+    assert_select "[data-testid=event-list] [data-testid=event-list-item] a" do |links|
+      assert_equal Event.chronological.map(&:title), links.map { |link| link.text.strip }
+    end
+    assert_select "[data-testid=event-list-item][data-event-id=?] [data-testid=source-icon][data-source=blog]", events(:later).id.to_s
+    assert_select "dialog[data-testid=new-event-dialog] form[action=?]", events_path do
+      assert_select "input[name=inline]"
+      assert_select "[name='event[source]']", count: 0
+    end
   end
 
   test "index displays an empty state" do
@@ -24,13 +33,16 @@ class EventsControllerTest < ActionDispatch::IntegrationTest
     get events_url
 
     assert_response :success
-    assert_select "p", "No events yet. Create your first event."
+    assert_select "[data-testid=empty-state]", /No events yet/
+    assert_select "[data-testid=timeline]", count: 0
   end
 
   test "shows event details" do
     get event_url(@event)
 
     assert_response :success
+    assert_select "turbo-frame#event_details[target=_top] h1", @event.title
+    assert_select "[data-testid=source-icon][data-source=manual]"
     assert_select "h1", @event.title
     assert_select "time[datetime=?]", @event.happened_on.iso8601
     assert_select "p", @event.description
@@ -81,6 +93,39 @@ class EventsControllerTest < ActionDispatch::IntegrationTest
     assert_equal @attributes[:url], created.url
     follow_redirect!
     assert_select "[role=status]", "Event was successfully created."
+  end
+
+  test "creating from the timeline dialog updates the page in place" do
+    assert_difference "Event.count", 1 do
+      post events_url(format: :turbo_stream), params: { inline: 1, event: @attributes }
+    end
+
+    created = Event.order(:id).last
+    assert_response :success
+    assert_equal "text/vnd.turbo-stream.html", response.media_type
+    assert_select "turbo-stream[action=replace][target=timeline_section]" do
+      assert_select "template turbo-frame#event_details[src=?]", event_path(created)
+      assert_select "template [data-testid=event-list-item][data-event-id=?]", created.id.to_s
+    end
+    assert_select "turbo-stream[action=update][target=flash]", /Event was successfully created./
+  end
+
+  test "invalid creation from the timeline dialog re-renders the form with errors" do
+    assert_no_difference "Event.count" do
+      post events_url(format: :turbo_stream), params: { inline: 1, event: @attributes.merge(title: "") }
+    end
+
+    assert_response :unprocessable_entity
+    assert_select "turbo-stream[action=replace][target=event_form]" do
+      assert_select "template [role=alert]", /Title can't be blank/
+      assert_select "template input[name=inline]"
+    end
+  end
+
+  test "the standalone new page keeps redirecting even when Turbo asks for a stream" do
+    post events_url, params: { event: @attributes }, as: :turbo_stream
+
+    assert_redirected_to event_url(Event.order(:id).last)
   end
 
   test "invalid creation renders errors and preserves entered values" do
@@ -135,7 +180,7 @@ class EventsControllerTest < ActionDispatch::IntegrationTest
     assert_redirected_to events_url
     follow_redirect!
     assert_select "[role=status]", "Event was successfully deleted."
-    assert_select "article#event_#{@event.id}", count: 0
+    assert_select "#event_#{@event.id}", count: 0
   end
 
   test "returns not found for missing events" do

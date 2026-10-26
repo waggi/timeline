@@ -1,0 +1,4 @@
+<%= turbo_stream.replace "timeline_section", partial: "timeline", locals: { events: Event.chronological, selected: @event } %>
+<%= turbo_stream.update "flash" do %>
+  <p role="status"><%= notice %></p>
+<% end %>

@@ -1,4 +1,8 @@
-<%= form_with model: event do |form| %>
+<%= form_with model: event, id: "event_form", class: "event-form", data: { testid: "event-form" } do |form| %>
+  <% if local_assigns[:inline] %>
+    <%= hidden_field_tag :inline, 1 %>
+  <% end %>
+
   <% if event.errors.any? %>
     <div role="alert">
       <h2>Please correct the following errors:</h2>
@@ -20,11 +24,11 @@
   </p>
   <p>
     <%= form.label :description %>
-    <%= form.text_area :description, rows: 8 %>
+    <%= form.text_area :description, rows: local_assigns[:inline] ? 4 : 8 %>
   </p>
   <p>
     <%= form.label :url, "Source URL" %>
-    <%= form.url_field :url %>
+    <%= form.url_field :url, placeholder: "https://" %>
   </p>
-  <%= form.submit %>
+  <%= form.submit class: "button button--primary" %>
 <% end %>

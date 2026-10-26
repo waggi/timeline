@@ -18,10 +18,14 @@ class EventsController < ApplicationController
   def create
     @event = Event.new(event_params)
 
-    if @event.save
-      redirect_to @event, notice: "Event was successfully created."
-    else
-      render :new, status: :unprocessable_entity
+    respond_to do |format|
+      if @event.save
+        format.turbo_stream { flash.now[:notice] = "Event was successfully created." } if inline_form?
+        format.html { redirect_to @event, notice: "Event was successfully created." }
+      else
+        format.turbo_stream { render turbo_stream: turbo_stream.replace("event_form", partial: "form", locals: { event: @event, inline: true }), status: :unprocessable_entity } if inline_form?
+        format.html { render :new, status: :unprocessable_entity }
+      end
     end
   end
 
@@ -41,6 +45,12 @@ class EventsController < ApplicationController
   private
     def set_event
       @event = Event.find(params.expect(:id))
+    end
+
+    # The form in the dialog on the timeline page updates the page in place;
+    # the standalone new page keeps the redirect to the event.
+    def inline_form?
+      params[:inline].present?
     end
 
     def event_params

@@ -1,0 +1,30 @@
+<section id="timeline_section" class="timeline-layout" data-controller="timeline"
+  data-timeline-items-value="<%= timeline_items(events).to_json %>"
+  data-timeline-selected-value="<%= selected&.id %>">
+  <% if events.empty? %>
+    <p class="empty-state" data-testid="empty-state">No events yet. Create your first event with “Add event”.</p>
+  <% else %>
+    <% Event::SOURCES.each do |source| %>
+      <template data-timeline-target="icon" data-source="<%= source %>"><%= source_icon(source) %></template>
+    <% end %>
+
+    <div class="card timeline-card">
+      <div class="timeline-toolbar">
+        <p class="timeline-hint">Drag to scroll · Ctrl + wheel or pinch to zoom</p>
+        <div class="timeline-zoom" role="group" aria-label="Zoom">
+          <button type="button" class="button" data-action="timeline#zoomOut" data-testid="zoom-out" aria-label="Zoom out">−</button>
+          <button type="button" class="button" data-action="timeline#zoomIn" data-testid="zoom-in" aria-label="Zoom in">+</button>
+          <button type="button" class="button" data-action="timeline#fit" data-testid="zoom-fit">Show all</button>
+        </div>
+      </div>
+      <div class="timeline-canvas" data-timeline-target="canvas" data-testid="timeline"></div>
+    </div>
+
+    <%= turbo_frame_tag "event_details", src: (event_path(selected) if selected), target: "_top",
+      class: "card event-details", data: { timeline_target: "details", testid: "event-details" } do %>
+      <p class="event-details__placeholder">Select an event on the timeline or in the list to see its details.</p>
+    <% end %>
+
+    <%= render "event_list", events: events %>
+  <% end %>
+</section>
