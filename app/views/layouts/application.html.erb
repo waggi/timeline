@@ -26,7 +26,17 @@
 
   <body>
     <header class="site-header">
-      <%= link_to "Timeline", root_path, class: "site-header__brand" %>
+      <%= link_to root_path, class: "site-header__brand" do %>
+        <svg class="site-header__logo" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true">
+          <rect width="32" height="32" rx="9" fill="#4f46e5"/>
+          <path d="M6 20h20" stroke="#c7c9ff" stroke-width="2" stroke-linecap="round"/>
+          <circle cx="10" cy="20" r="3" fill="#fff"/>
+          <circle cx="17" cy="20" r="3" fill="#fff"/>
+          <circle cx="23" cy="20" r="3" fill="#fff"/>
+          <path d="M17 17V9" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+        <span>Timeline</span>
+      <% end %>
     </header>
     <main class="timeline">
       <div id="flash" class="flash">

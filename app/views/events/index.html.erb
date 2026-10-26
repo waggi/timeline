@@ -1,9 +1,15 @@
 <% content_for :title, "Events | Timeline" %>
 
 <div data-controller="dialog">
-  <header class="page-header">
-    <h1>Events</h1>
-    <button type="button" class="button button--primary" data-action="dialog#open" data-testid="add-event-button">Add event</button>
+  <header class="hero">
+    <div>
+      <p class="hero__eyebrow">Interactive timeline</p>
+      <h1>Events</h1>
+      <p class="hero__lead">Every moment in one place. Drag to travel through time, zoom in on a period, click an event to read it.</p>
+    </div>
+    <button type="button" class="button button--primary button--large" data-action="dialog#open" data-testid="add-event-button">
+      <span aria-hidden="true">+</span> Add event
+    </button>
   </header>
 
   <%= render "timeline", events: @events, selected: nil %>
@@ -11,8 +17,11 @@
   <dialog class="dialog" aria-labelledby="new-event-heading" data-dialog-target="dialog" data-testid="new-event-dialog"
     data-action="click->dialog#closeOnBackdrop turbo:submit-end->dialog#closeOnSuccess">
     <div class="dialog__header">
-      <h2 id="new-event-heading">New event</h2>
-      <button type="button" class="button button--ghost" data-action="dialog#close" aria-label="Close">&times;</button>
+      <div>
+        <h2 id="new-event-heading">New event</h2>
+        <p class="dialog__lead">It appears on the timeline right after saving.</p>
+      </div>
+      <button type="button" class="button button--icon" data-action="dialog#close" aria-label="Close">&times;</button>
     </div>
     <%= render "form", event: Event.new, inline: true %>
   </dialog>

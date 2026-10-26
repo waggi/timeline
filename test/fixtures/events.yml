@@ -3,6 +3,7 @@ earlier:
   happened_on: 2020-01-01
   description: The beginning of the timeline.
   url: https://example.com/first
+  category: Milestones
   source: manual
 
 later:

@@ -1,12 +1,14 @@
 require "test_helper"
 
 class EventsControllerTest < ActionDispatch::IntegrationTest
+  include EventsHelper
+
   setup do
     @event = events(:earlier)
-    @attributes = { title: "New event", happened_on: "2026-10-23", description: "Some details", url: "https://example.com/new" }
+    @attributes = { title: "New event", happened_on: "2026-10-23", category: "Releases", description: "Some details", url: "https://example.com/new" }
   end
 
-  test "home page shows the timeline, the event list and the inline form" do
+  test "home page shows the timeline, category filter, event list and inline form" do
     get root_url
 
     assert_response :success
@@ -14,16 +16,26 @@ class EventsControllerTest < ActionDispatch::IntegrationTest
     assert_select "[data-controller=timeline][data-timeline-items-value]" do |sections|
       items = JSON.parse(sections.first["data-timeline-items-value"])
       assert_equal Event.chronological.map(&:id), items.map { |item| item["id"] }
-      assert_equal({ "id" => @event.id, "title" => @event.title, "date" => "2020-01-01", "source" => "manual", "url" => event_path(@event) }, items.first)
+      assert_equal({ "id" => @event.id, "title" => @event.title, "date" => "2020-01-01", "category" => "Milestones",
+        "color" => category_class("Milestones"), "url" => event_path(@event) }, items.first)
     end
     assert_select "[data-testid=timeline]"
+    assert_select "[data-testid=stats] dd" do |values|
+      assert_equal [ "2", "2020–2024", "1" ], values.map(&:text)
+    end
+    assert_select "[data-testid=category-filter-chip]", 3 do |chips|
+      assert_equal [ "All", "Milestones", "No category" ], chips.map { |chip| chip.text.squish.sub(/ \d+\z/, "") }
+    end
     assert_select "turbo-frame#event_details[target=_top]"
     assert_select "[data-testid=event-list] [data-testid=event-list-item] a" do |links|
       assert_equal Event.chronological.map(&:title), links.map { |link| link.text.strip }
     end
-    assert_select "[data-testid=event-list-item][data-event-id=?] [data-testid=source-icon][data-source=blog]", events(:later).id.to_s
+    assert_select "[data-testid=event-list-item][data-event-id=?] [data-testid=category-chip]", @event.id.to_s, "Milestones"
+    assert_select "[data-testid=source-icon]", count: 0
     assert_select "dialog[data-testid=new-event-dialog] form[action=?]", events_path do
       assert_select "input[name=inline]"
+      assert_select "input[name='event[category]'][list=category_suggestions]"
+      assert_select "datalist#category_suggestions option[value=Milestones]"
       assert_select "[name='event[source]']", count: 0
     end
   end
@@ -42,12 +54,13 @@ class EventsControllerTest < ActionDispatch::IntegrationTest
 
     assert_response :success
     assert_select "turbo-frame#event_details[target=_top] h1", @event.title
+    assert_select "[data-testid=category-chip]", "Milestones"
     assert_select "[data-testid=source-icon][data-source=manual]"
+    assert_select "p", "Added manually"
     assert_select "h1", @event.title
     assert_select "time[datetime=?]", @event.happened_on.iso8601
     assert_select "p", @event.description
-    assert_select "a[href=?]", @event.url
-    assert_select "p", "Source type: manual"
+    assert_select "a[href=?]", @event.url, "Open source ↗"
   end
 
   test "shows an event without optional fields" do
@@ -55,7 +68,7 @@ class EventsControllerTest < ActionDispatch::IntegrationTest
     get event_url(@event)
 
     assert_response :success
-    assert_select "a", text: "Source", count: 0
+    assert_select "a", text: "Open source ↗", count: 0
   end
 
   test "does not render unsafe source links even if validations were bypassed" do
@@ -64,7 +77,7 @@ class EventsControllerTest < ActionDispatch::IntegrationTest
 
     assert_response :success
     assert_select "a[href^='javascript:']", count: 0
-    assert_select "a:not([href])", "Source"
+    assert_select "a:not([href])", "Open source ↗"
   end
 
   test "renders the new event form" do
@@ -76,6 +89,7 @@ class EventsControllerTest < ActionDispatch::IntegrationTest
     assert_select "input[type=date][name='event[happened_on]'][required]"
     assert_select "textarea[name='event[description]']"
     assert_select "input[type=url][name='event[url]']"
+    assert_select "input[name='event[category]']"
     assert_select "[name='event[source]']", count: 0
   end
 
@@ -91,6 +105,7 @@ class EventsControllerTest < ActionDispatch::IntegrationTest
     assert_equal Date.new(2026, 10, 23), created.happened_on
     assert_equal @attributes[:description], created.description
     assert_equal @attributes[:url], created.url
+    assert_equal "Releases", created.category
     follow_redirect!
     assert_select "[role=status]", "Event was successfully created."
   end
@@ -158,6 +173,7 @@ class EventsControllerTest < ActionDispatch::IntegrationTest
     assert_equal Date.new(2026, 10, 23), @event.happened_on
     assert_equal @attributes[:description], @event.description
     assert_equal @attributes[:url], @event.url
+    assert_equal "Releases", @event.category
     assert_equal "blog", @event.source
   end
 

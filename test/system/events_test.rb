@@ -5,21 +5,25 @@ class EventsTest < ApplicationSystemTestCase
     visit root_url
 
     assert_selector "[data-testid=timeline] [data-testid=timeline-item]", count: Event.count
-    assert_selector "[data-testid=timeline-item][data-source=blog] [data-testid=source-icon]"
-    find("[data-testid=zoom-in]").click
-    find("[data-testid=zoom-fit]").click
+    assert_selector "[data-testid=timeline-item]", text: "MILESTONES"
+    assert_no_selector "[data-testid=timeline] [data-testid=source-icon]"
 
     find("[data-testid=timeline-item]", text: "Later event").click
     within "[data-testid=event-details]" do
       assert_selector "h1", text: "Later event"
-      assert_text "Source type: blog"
+      assert_text "Collected from the blog"
     end
 
     within("[data-testid=event-list]") { click_on "First event" }
     within "[data-testid=event-details]" do
       assert_selector "h1", text: "First event"
-      assert_link "Source", href: "https://example.com/first"
+      assert_link "Open source", href: "https://example.com/first"
     end
+
+    find("[data-testid=zoom-in]").click
+    find("[data-testid=zoom-out]").click
+    find("[data-testid=zoom-fit]").click
+    assert_selector "[data-testid=timeline-item]", count: Event.count
   end
 
   test "adding, editing and deleting an event from the timeline page" do
@@ -29,6 +33,7 @@ class EventsTest < ApplicationSystemTestCase
     within "[data-testid=new-event-dialog]" do
       fill_in "Title", with: "A milestone"
       fill_in "Happened on", with: Date.new(2026, 10, 23)
+      fill_in "Category", with: "Launches"
       fill_in "Description", with: "First line\nSecond line"
       fill_in "Source URL", with: "https://example.com/milestone"
       click_on "Create Event"
@@ -41,7 +46,8 @@ class EventsTest < ApplicationSystemTestCase
     within "[data-testid=event-details]" do
       assert_selector "h1", text: "A milestone"
       assert_text "First line"
-      assert_text "Source type: manual"
+      assert_text "Added manually"
+      assert_selector "[data-testid=category-chip]", text: "Launches"
       find("[data-testid=event-edit-link]").click
     end
 
@@ -56,6 +62,23 @@ class EventsTest < ApplicationSystemTestCase
 
     assert_text "Event was successfully deleted."
     assert_no_text "Updated milestone"
+  end
+
+  test "filtering the timeline by category" do
+    visit root_url
+    assert_selector "[data-testid=timeline-item]", count: 2
+
+    click_on "Milestones"
+    assert_selector "[data-testid=timeline-item]", count: 1, text: "First event"
+    assert_selector "[data-testid=event-list-item]", count: 1
+    assert_selector "[data-testid=category-filter-chip][aria-pressed=true]", text: "Milestones"
+
+    click_on "No category"
+    assert_selector "[data-testid=timeline-item]", count: 1, text: "Later event"
+
+    find("[data-testid=category-filter-chip]", text: "All").click
+    assert_selector "[data-testid=timeline-item]", count: 2
+    assert_selector "[data-testid=event-list-item]", count: 2
   end
 
   test "shows validation errors in the dialog and lets the user correct them" do

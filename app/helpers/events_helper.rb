@@ -7,6 +7,29 @@ module EventsHelper
     "blog" => "M5 11a8 8 0 0 1 8 8 M5 5a14 14 0 0 1 14 14 M6 19h.01"
   }.freeze
 
+  # Colors come from the CSS classes category-1..category-7, handed out in the
+  # order categories were first used: adding a category never repaints the others.
+  # From the 8th category on colors repeat; the name is always shown next to them.
+  CATEGORY_COLORS = 7
+
+  def category_class(category)
+    return "category-none" if category.blank?
+
+    @categories_by_first_use ||= Event.categories_by_first_use
+    index = @categories_by_first_use.index(category) || @categories_by_first_use.size
+    "category-#{index % CATEGORY_COLORS + 1}"
+  end
+
+  def category_chip(category)
+    return if category.blank?
+
+    tag.span category, class: "category-chip #{category_class(category)}", data: { testid: "category-chip" }
+  end
+
+  def event_date(date)
+    date.strftime("%B %-d, %Y")
+  end
+
   def source_label(source)
     SOURCE_LABELS.fetch(source, source.to_s.humanize)
   end
@@ -24,7 +47,8 @@ module EventsHelper
 
   def timeline_items(events)
     events.map do |event|
-      { id: event.id, title: event.title, date: event.happened_on.iso8601, source: event.source, url: event_path(event) }
+      { id: event.id, title: event.title, date: event.happened_on.iso8601, category: event.category,
+        color: category_class(event.category), url: event_path(event) }
     end
   end
 end
